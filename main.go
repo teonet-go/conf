@@ -44,7 +44,7 @@ func main() {
 	}
 
 	// Get fields and its values from struct and add it to form
-	fields := GetFields[*widget.Entry](person, func(field *Field[*widget.Entry]) {
+	fields := GetFields(person, func(field *Field[*widget.Entry]) {
 		entry := widget.NewEntry()
 		entry.SetText(field.ValueStr)
 		form.Append(field.Name, entry)
@@ -57,9 +57,12 @@ func main() {
 		// Get the values from the form.
 		// Range by fields slice and set value of Entry field to the person
 		// struct
-		for _, field := range fields {
-			SetValue(&person, field.Name, field.Entry.Text)
-		}
+		// for _, field := range fields {
+		// 	SetValue(&person, field.Name, field.Entry.Text)
+		// }
+		fields.SetValues(&person, func(field *Field[*widget.Entry]) string {
+			return field.Entry.Text
+		})
 
 		// Encode the modified data structure back into JSON
 		updatedJSON, err := json.MarshalIndent(person, "", "  ")

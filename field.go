@@ -9,9 +9,8 @@ import (
 )
 
 type Field[T any] struct {
-	Name string
-	Type string
-	// TypeOf   reflect.Type
+	Name     string
+	Type     string
 	ValueStr string
 	Value    any
 	Entry    T
@@ -24,10 +23,11 @@ type Field[T any] struct {
 //
 // The function accepts two parameters:
 //   - o: the object from which to extract the fields.
-//   - f: the function to be called for each field, which takes a pointer to a Field[T] struct as its parameter.
+//   - f: the function to be called for each field, which takes a pointer to a
+//     Field[T] struct as its parameter.
 //
 // It returns a slice of pointers to Field[T] structs.
-func GetFields[T any](o any, f func(field *Field[T])) (fields []*Field[T]) {
+func GetFields[T any](o any, f func(field *Field[T])) (fields Fields[T]) {
 	v := reflect.ValueOf(o)
 	t := reflect.TypeOf(o)
 	for i := 0; i < v.NumField(); i++ {
@@ -52,7 +52,7 @@ func GetFields[T any](o any, f func(field *Field[T])) (fields []*Field[T]) {
 	return
 }
 
-func SetValue[P any](p *P, name string, value string) {
+func SetValue(p any, name string, value string) {
 
 	// Get the reflect.Value of the p variable
 	v := reflect.ValueOf(p).Elem()
@@ -81,10 +81,15 @@ func SetValue[P any](p *P, name string, value string) {
 				field.Type())
 		}
 	}
+}
 
-	// intPtr := reflect.New(field.Type())
+type Fields[T any] []*Field[T]
 
-	// parseNumber[field] = parseNumber
+func (fields Fields[T]) SetValues(p any, f func(field *Field[T]) string) {
+	for _, field := range fields {
+		txt := f(field)
+		SetValue(p, field.Name, txt)
+	}
 }
 
 type Number interface {
