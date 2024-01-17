@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 
@@ -52,16 +53,37 @@ func main() {
 	// }
 	var data = person
 
-	// Get fields and its values from struct and add it to form
+	// Get fields and its values from struct or map and add it to form
 	fields := conf.GetFields(data, func(field *conf.Field[*widget.Entry]) {
+
+		// Add field to form
 		entry := widget.NewEntry()
 		entry.SetText(field.ValueStr)
+
+		// Add field validation by type
+		entry.Validator = func(s string) (err error) {
+			err = conf.ValidateValue(field, s)
+			return
+		}
 		form.Append(field.NameDisplay, entry)
+
+		// Add hint text to this forms entry
+		form.Items[len(form.Items)-1].HintText = fmt.Sprintf("%s (%s)",
+			field.NameDisplay, field.Type)
+
+		// Set field entry to processing it in SetValues
 		field.Entry = entry
 	})
 
 	// Create a save button
 	saveButton := widget.NewButton("Save", func() {
+
+		// Check if the form is valid
+		if err := form.Validate(); err != nil {
+			msg := fmt.Sprintf("Cannot save this form:\n %s", err)
+			dialog.ShowError(fmt.Errorf(msg), w)
+			return
+		}
 
 		// Update fields values
 		fields.SetValues(&data, func(field *conf.Field[*widget.Entry]) string {

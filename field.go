@@ -59,7 +59,7 @@ func GetFields[T any](o any, f func(field *Field[T])) (fields Fields[T]) {
 
 	// Make fields
 	switch {
-		
+
 	// If the o object is struct
 	case isStruct(o):
 		v := reflect.ValueOf(o)
@@ -195,6 +195,37 @@ func SetValue[T any](p any, field *Field[T], value string) (err error) {
 	// If the p parameter is not a pointer to a struct or a map, panic
 	default:
 		panic("p parameter of SetValue should be a pointer to struct or a map")
+	}
+
+	return
+}
+
+// ValidateValue validates the value of a given field.
+//
+// The function takes in two parameters: field, a pointer to a Field[T] struct,
+// and value, a string representing the value to be validated. The field struct
+// contains information about the field's type and name. The value parameter is
+// a string that will be converted to the appropriate type based on the field's
+// type.
+//
+// The function returns an error if the value is not of the expected type.
+func ValidateValue[T any](field *Field[T], value string) (err error) {
+
+	switch field.Type {
+
+	// Check integer
+	case "int", "int8", "int16", "int32", "int64", "uint", "uint8",
+		"uint16", "uint32", "uint64":
+		_, err = strconv.Atoi(value)
+
+	// Check float
+	case "float32", "float64":
+		_, err = strconv.ParseFloat(value, 64)
+	}
+
+	// CHeck error
+	if err != nil {
+		err = fmt.Errorf("type of %s value should be %s", field.Name, field.Type)
 	}
 
 	return
