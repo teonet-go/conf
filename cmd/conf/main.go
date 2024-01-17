@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
+	"github.com/teonet-go/conf"
 )
 
 type Person struct {
@@ -43,29 +44,32 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Decode the JSON into map
+	// var data map[string]any
+	// err = json.Unmarshal(jsonData, &data)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	var data = person
+
 	// Get fields and its values from struct and add it to form
-	fields := GetFields(person, func(field *Field[*widget.Entry]) {
+	fields := conf.GetFields(data, func(field *conf.Field[*widget.Entry]) {
 		entry := widget.NewEntry()
 		entry.SetText(field.ValueStr)
-		form.Append(field.Name, entry)
+		form.Append(field.NameDisplay, entry)
 		field.Entry = entry
 	})
 
 	// Create a save button
 	saveButton := widget.NewButton("Save", func() {
 
-		// Get the values from the form.
-		// Range by fields slice and set value of Entry field to the person
-		// struct
-		// for _, field := range fields {
-		// 	SetValue(&person, field.Name, field.Entry.Text)
-		// }
-		fields.SetValues(&person, func(field *Field[*widget.Entry]) string {
+		// Update fields values
+		fields.SetValues(&data, func(field *conf.Field[*widget.Entry]) string {
 			return field.Entry.Text
 		})
 
 		// Encode the modified data structure back into JSON
-		updatedJSON, err := json.MarshalIndent(person, "", "  ")
+		updatedJSON, err := json.MarshalIndent(data, "", "  ")
 		if err != nil {
 			dialog.ShowError(err, w)
 			return
