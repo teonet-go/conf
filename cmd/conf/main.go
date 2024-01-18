@@ -22,11 +22,13 @@ import (
 
 // Person structure
 type Person struct {
-	Name string  `json:"name"`
-	Age  float64 `json:"age"`
-	Tst  int     `json:"tst"`
-	Map  string  `json:"map"`
-	On   bool    `json:"on"`
+	Name     string    `json:"name"`
+	Age      float64   `json:"age"`
+	Tst      int       `json:"tst"`
+	Map      string    `json:"map"`
+	On       bool      `json:"on"`
+	IntArray []int     `json:"int_array"`
+	FltArray []float64 `json:"float_array"`
 }
 
 // main is the entry point of the program.
@@ -125,7 +127,8 @@ func main() {
 				val := field.Entry.(*widget.Check).Checked
 				return fmt.Sprintf("%v", val)
 			}
-			return field.Entry.(*widget.Entry).Text
+			val := field.Entry.(*widget.Entry).Text
+			return val
 		})
 
 		// Encode the modified data structure back into JSON

@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"strings"
 	"unicode"
 
 	"golang.org/x/exp/constraints"
@@ -145,6 +146,22 @@ func SetValue[T any](p any, field *Field[T], value string) (err error) {
 				val.SetFloat(f)
 			case "bool":
 				val.SetBool(value == "true")
+			case "[]int":
+				s := strings.Split(strings.Trim(value, "[]"), " ")
+				a := make([]int, len(s))
+				for i, str := range s {
+					val, _ := strconv.Atoi(str)
+					a[i] = val
+				}
+				val.Set(reflect.ValueOf(a))
+			case "[]float64":
+				s := strings.Split(strings.Trim(value, "[]"), " ")
+				a := make([]float64, len(s))
+				for i, str := range s {
+					val, _ := strconv.ParseFloat(str, 64)
+					a[i] = val
+				}
+				val.Set(reflect.ValueOf(a))
 			default:
 				err = setError(field.Name, value, val.Type().String())
 			}
@@ -157,7 +174,6 @@ func SetValue[T any](p any, field *Field[T], value string) (err error) {
 	// setMapValue sets the value of a field in a map.
 	setMapValue := func(m map[string]any) (err error) {
 		key := field.Name
-		fmt.Printf("set %s: %v\n", key, value)
 
 		switch field.Type {
 		case "string":
@@ -174,6 +190,19 @@ func SetValue[T any](p any, field *Field[T], value string) (err error) {
 			m[key] = f
 		case "bool":
 			m[key] = value == "true"
+		case "[]interface {}":
+			s := strings.Split(strings.Trim(value, "[]"), " ")
+			a := make([]any, len(s))
+			for i, str := range s {
+				val, err := strconv.Atoi(str)
+				if err != nil {
+					val, _ := strconv.ParseFloat(str, 64)
+					a[i] = val
+					continue
+				}
+				a[i] = val
+			}
+			m[key] = a
 		default:
 			err = setError(field.Name, value, field.Type)
 		}
