@@ -26,6 +26,7 @@ type Person struct {
 	Age  float64 `json:"age"`
 	Tst  int     `json:"tst"`
 	Map  string  `json:"map"`
+	On   bool    `json:"on"`
 }
 
 // main is the entry point of the program.
@@ -69,25 +70,43 @@ func main() {
 	var data = person
 
 	// Get fields and its values from struct or map and add it to form
-	fields := conf.GetFields(data, func(field *conf.Field[*widget.Entry]) {
+	fields := conf.GetFields(data, func(field *conf.Field[fyne.CanvasObject]) {
 
-		// Add field to form
-		entry := widget.NewEntry()
-		entry.SetText(field.ValueStr)
+		var w fyne.CanvasObject // Widget
+		var d string            // Name to displat
 
-		// Add field validation by type
-		entry.Validator = func(s string) (err error) {
-			err = conf.ValidateValue(field, s)
-			return
+		if field.Type == "bool" {
+
+			// Add checkbox to form
+			check := widget.NewCheck(field.NameDisplay, func(bool) {})
+
+			w = check
+
+		} else {
+
+			// Add field to form
+			entry := widget.NewEntry()
+			entry.SetText(field.ValueStr)
+
+			// Add field validation by type
+			entry.Validator = func(s string) (err error) {
+				err = conf.ValidateValue(field, s)
+				return
+			}
+
+			w = entry
+			d = field.NameDisplay
 		}
-		form.Append(field.NameDisplay, entry)
+
+		// Append field to form
+		form.Append(d, w)
 
 		// Add hint text to this forms entry
 		form.Items[len(form.Items)-1].HintText = fmt.Sprintf("%s (%s)",
 			field.NameDisplay, field.Type)
 
 		// Set field entry to processing it in SetValues
-		field.Entry = entry
+		field.Entry = w
 	})
 
 	// Create a save button
@@ -101,8 +120,12 @@ func main() {
 		}
 
 		// Update fields values
-		fields.SetValues(&data, func(field *conf.Field[*widget.Entry]) string {
-			return field.Entry.Text
+		fields.SetValues(&data, func(field *conf.Field[fyne.CanvasObject]) string {
+			if field.Type == "bool" {
+				val := field.Entry.(*widget.Check).Checked
+				return fmt.Sprintf("%v", val)
+			}
+			return field.Entry.(*widget.Entry).Text
 		})
 
 		// Encode the modified data structure back into JSON

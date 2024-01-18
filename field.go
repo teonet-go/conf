@@ -143,6 +143,8 @@ func SetValue[T any](p any, field *Field[T], value string) (err error) {
 			case "float64":
 				f, _ := strconv.ParseFloat(value, 64)
 				val.SetFloat(f)
+			case "bool":
+				val.SetBool(value == "true")
 			default:
 				err = setError(field.Name, value, val.Type().String())
 			}
@@ -170,6 +172,8 @@ func SetValue[T any](p any, field *Field[T], value string) (err error) {
 		case "float64":
 			f, _ := strconv.ParseFloat(value, 64)
 			m[key] = f
+		case "bool":
+			m[key] = value == "true"
 		default:
 			err = setError(field.Name, value, field.Type)
 		}
