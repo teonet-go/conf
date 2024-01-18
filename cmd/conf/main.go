@@ -1,3 +1,9 @@
+// Copyright 2024 Kirill Scherba <kirill@scherba.ru>. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+// Config helper go package GUI sample application using Fyne widgets to show
+// json config data.
 package main
 
 import (
@@ -14,6 +20,7 @@ import (
 	"github.com/teonet-go/conf"
 )
 
+// Person structure
 type Person struct {
 	Name string  `json:"name"`
 	Age  float64 `json:"age"`
@@ -21,6 +28,14 @@ type Person struct {
 	Map  string  `json:"map"`
 }
 
+// main is the entry point of the program.
+//
+// It creates a new Fyne application, a new window, and a form for editing JSON
+// data. It loads the JSON data from a file, decodes it into a data structure,
+// and adds the fields and values to the form. It creates a save button that
+// validates the form, updates the field values, encodes the modified data
+// structure back into JSON, and writes it to a file. Finally, it sets the
+// window content, resizes it, and shows the window.
 func main() {
 	// Create a new Fyne application
 	a := app.New()
