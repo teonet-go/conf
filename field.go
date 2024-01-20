@@ -60,7 +60,7 @@ func GetFields[T any](o any, f func(field *Field[T])) (fields Fields[T]) {
 		fields = append(fields, field)
 		f(field)
 
-		fmt.Printf("%s: %v of type %v\n", name, fieldValue, fieldType)
+		fmt.Printf("%s: %v of type %v\n", field.Name, field.Value, field.Type)
 	}
 
 	// Make fields
@@ -146,6 +146,11 @@ func SetValue[T any](p any, field *Field[T], value string) (err error) {
 				val.SetFloat(f)
 			case "bool":
 				val.SetBool(value == "true")
+			// case "options.RadioGroup", "*options.RadioGroup":
+			// 	// TODO: set real value here, if possible - use reflet
+			// 	fmt.Println("radio group set value: ", value)
+			// 	// val.Pointer()
+			// 	val.Interface().(*options.RadioGroup).Selected = 33
 			case "[]int":
 				s := strings.Split(strings.Trim(value, "[]"), " ")
 				a := make([]int, len(s))
@@ -261,7 +266,7 @@ func ValidateValue[T any](field *Field[T], value string) (err error) {
 		_, err = strconv.ParseFloat(value, 64)
 	}
 
-	// CHeck error
+	// Check error
 	if err != nil {
 		err = fmt.Errorf("type of %s value should be %s", field.Name, field.Type)
 	}

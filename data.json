@@ -23,5 +23,14 @@
     3.62,
     4.5,
     13.5
-  ]
+  ],
+  "option": {
+    "options": [
+      "Option 1",
+      "Option 2",
+      "Option 3"
+    ],
+    "horizontal": true,
+    "selected": 1
+  }
 }

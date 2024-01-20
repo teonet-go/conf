@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"slices"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -18,17 +19,19 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 	"github.com/teonet-go/conf"
+	"github.com/teonet-go/conf/options"
 )
 
 // Person structure
 type Person struct {
-	Name     string    `json:"name"`
-	Age      float64   `json:"age"`
-	Tst      int       `json:"tst"`
-	Map      string    `json:"map"`
-	On       bool      `json:"on"`
-	IntArray []int     `json:"int_array"`
-	FltArray []float64 `json:"float_array"`
+	Name     string              `json:"name"`
+	Age      float64             `json:"age"`
+	Tst      int                 `json:"tst"`
+	Map      string              `json:"map"`
+	On       bool                `json:"on"`
+	IntArray []int               `json:"int_array"`
+	FltArray []float64           `json:"float_array"`
+	Option   *options.RadioGroup `json:"option"`
 }
 
 // main is the entry point of the program.
@@ -50,22 +53,15 @@ func main() {
 	form := &widget.Form{}
 
 	// Load the JSON data from a file
-	filePath := "data.json"
-	jsonData, err := os.ReadFile(filePath)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Decode the JSON into a data structure
 	var person Person
-	err = json.Unmarshal(jsonData, &person)
+	err := loadJson(&person)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Decode the JSON into map
 	// var data map[string]any
-	// err = json.Unmarshal(jsonData, &data)
+	// err = loadJson(&data)
 	// if err != nil {
 	// 	log.Fatal(err)
 	// }
@@ -77,14 +73,28 @@ func main() {
 		var w fyne.CanvasObject // Widget
 		var d string            // Name to displat
 
-		if field.Type == "bool" {
+		switch field.Type {
+
+		case "bool":
 
 			// Add checkbox to form
 			check := widget.NewCheck(field.NameDisplay, func(bool) {})
 
 			w = check
 
-		} else {
+		case "options.RadioGroup", "*options.RadioGroup":
+			opts, h := options.GetRadioGroup(field.Value)
+			radioGroup := widget.NewRadioGroup(opts, func(s string) {
+				fmt.Printf("changed: %s\n", s)
+				i := slices.Index(opts, s)
+				fmt.Println(i)
+			})
+			radioGroup.Horizontal = h
+
+			w = radioGroup
+			d = field.NameDisplay
+
+		default:
 
 			// Add field to form
 			entry := widget.NewEntry()
@@ -123,24 +133,26 @@ func main() {
 
 		// Update fields values
 		fields.SetValues(&data, func(field *conf.Field[fyne.CanvasObject]) string {
-			if field.Type == "bool" {
+			switch field.Type {
+
+			case "bool":
 				val := field.Entry.(*widget.Check).Checked
 				return fmt.Sprintf("%v", val)
+
+			case "options.RadioGroup", "*options.RadioGroup":
+				// TODO: create and use options function to set value
+				opt := field.Value.(*options.RadioGroup)
+				val := field.Entry.(*widget.RadioGroup).Selected
+				opt.Selected = slices.Index(opt.Options, val)
+
+			default:
+				return field.Entry.(*widget.Entry).Text
 			}
-			val := field.Entry.(*widget.Entry).Text
-			return val
+			return ""
 		})
 
-		// Encode the modified data structure back into JSON
-		updatedJSON, err := json.MarshalIndent(data, "", "  ")
-		if err != nil {
-			dialog.ShowError(err, w)
-			return
-		}
-
 		// Write the encoded JSON back to the file
-		err = os.WriteFile(filePath, updatedJSON, 0644)
-		if err != nil {
+		if err := saveJson(data); err != nil {
 			dialog.ShowError(err, w)
 			return
 		}
@@ -161,4 +173,29 @@ func main() {
 
 	// Show the window
 	w.ShowAndRun()
+}
+
+const filePath = "data.json"
+
+func loadJson(v any) error {
+	// Load the JSON data from a file
+	jsonData, err := os.ReadFile(filePath)
+	if err != nil {
+		return err
+	}
+
+	// Decode the JSON into a data structure
+	return json.Unmarshal(jsonData, v)
+}
+
+func saveJson(v any) error {
+
+	// Encode the modified data structure back into JSON
+	data, err := json.MarshalIndent(v, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	// Write the encoded JSON back to the file
+	return os.WriteFile(filePath, data, 0644)
 }
