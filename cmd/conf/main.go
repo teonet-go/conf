@@ -102,7 +102,7 @@ func main() {
 
 			// Add field validation by type
 			entry.Validator = func(s string) (err error) {
-				err = conf.ValidateValue(field, s)
+				err = field.ValidateValue(s)
 				return
 			}
 
