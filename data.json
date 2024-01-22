@@ -1,7 +1,7 @@
 {
   "name": "John Smith",
-  "age": 57.317948123,
-  "tst": 10,
+  "age": 57.3179481234,
+  "tst": 1001,
   "map": "12345678",
   "on": false,
   "int_array": [
@@ -31,6 +31,6 @@
       "Option 3"
     ],
     "horizontal": true,
-    "selected": 1
+    "selected": 2
   }
 }

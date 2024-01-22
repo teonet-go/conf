@@ -16,8 +16,7 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
-	"fyne.io/fyne/v2/widget"
-	"github.com/teonet-go/conf"
+	"github.com/teonet-go/conf/fyne/form"
 	"github.com/teonet-go/conf/options"
 )
 
@@ -63,117 +62,38 @@ func main() {
 	// }
 	var data = person
 
-	// Create a form for editing the JSON data
-	form := &widget.Form{}
-
-	// Get fields and its values from struct or map and add it to form
-	fields := conf.GetFields(data, func(field *conf.Field[fyne.CanvasObject]) {
-
-		var w fyne.CanvasObject // Widget
-		var d string            // Name to displat
-
-		switch field.Type {
-
-		// Bool fields
-		case "bool":
-
-			// Add checkbox to form
-			check := widget.NewCheck(field.NameDisplay, func(bool) {})
-
-			w = check
-
-		// The options.RadioGroup fields
-		case "options.RadioGroup", "*options.RadioGroup":
-
-			// Add radio group to form
-			opts, h, selected := options.GetRadioGroup(field.Value)
-			radioGroup := widget.NewRadioGroup(opts, func(s string) {})
-			radioGroup.Horizontal = h
-			radioGroup.Selected = selected
-
-			w = radioGroup
-			d = field.NameDisplay
-
-		// Any other simple fields displayed as string: string, int, float,
-		// etc.
-		default:
-
-			// Add text entry field to form
-			entry := widget.NewEntry()
-			entry.SetText(field.ValueStr)
-
-			// Add field validation by type
-			entry.Validator = func(s string) (err error) {
-				err = field.ValidateValue(s)
-				return
-			}
-
-			w = entry
-			d = field.NameDisplay
-		}
-
-		// Append field to form
-		form.Append(d, w)
-
-		// Add hint text to this forms entry
-		form.Items[len(form.Items)-1].HintText = fmt.Sprintf("%s (%s)",
-			field.NameDisplay, field.Type)
-
-		// Set field entry to processing it in SetValues
-		field.Entry = w
-	})
+	// Create a form from the struct or map that contains JSON data
+	form := form.New(data)
 
 	// Create a save button
-	saveButton := widget.NewButton("Save", func() {
-
-		// Check if the form is valid
-		if err := form.Validate(); err != nil {
+	saveButton := form.NewSaveButton(&data,
+		// Save button callback
+		func() {
+			// Write the encoded JSON back to the file and show Info dialog or
+			// show error dialog at error.
+			if err := saveJson(data); err != nil {
+				dialog.ShowError(err, w)
+				return
+			}
+			dialog.ShowInformation(
+				"Success", "JSON file updated successfully!",
+				w,
+			)
+		},
+		// Form validation error callback
+		func(err error) {
 			msg := fmt.Sprintf("Cannot save this form:\n %s", err)
 			dialog.ShowError(fmt.Errorf(msg), w)
-			return
-		}
-
-		// Update fields values
-		fields.SetValues(&data, func(field *conf.Field[fyne.CanvasObject]) string {
-			switch field.Type {
-
-			// Bool fields
-			case "bool":
-				val := field.Entry.(*widget.Check).Checked
-				return fmt.Sprintf("%v", val)
-
-			// The options.RadioGroup fields
-			case "options.RadioGroup", "*options.RadioGroup":
-				val := field.Entry.(*widget.RadioGroup).Selected
-				options.SetSelectedValue(field.Value, val)
-
-			// Any other simple fields displayed as string: string, int, float,
-			// etc.
-			default:
-				return field.Entry.(*widget.Entry).Text
-			}
-
-			return ""
-		})
-
-		// Write the encoded JSON back to the file
-		if err := saveJson(data); err != nil {
-			dialog.ShowError(err, w)
-			return
-		}
-
-		dialog.ShowInformation("Success", "JSON file updated successfully!", w)
-	})
+		},
+	)
 
 	// Create a container for the form and save button
-	content := container.NewVBox(
-		form,
-		saveButton,
-	)
+	content := container.NewVBox(form, saveButton)
 
 	// Set the window content
 	w.SetContent(content)
 
+	// Resize the window
 	w.Resize(fyne.NewSize(500, 500))
 
 	// Show the window
