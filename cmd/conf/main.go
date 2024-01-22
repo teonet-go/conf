@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"slices"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -49,9 +48,6 @@ func main() {
 	// Create a new window
 	w := a.NewWindow("JSON Editor")
 
-	// Create a form for editing the JSON data
-	form := &widget.Form{}
-
 	// Load the JSON data from a file
 	var person Person
 	err := loadJson(&person)
@@ -67,6 +63,9 @@ func main() {
 	// }
 	var data = person
 
+	// Create a form for editing the JSON data
+	form := &widget.Form{}
+
 	// Get fields and its values from struct or map and add it to form
 	fields := conf.GetFields(data, func(field *conf.Field[fyne.CanvasObject]) {
 
@@ -75,6 +74,7 @@ func main() {
 
 		switch field.Type {
 
+		// Bool fields
 		case "bool":
 
 			// Add checkbox to form
@@ -82,21 +82,23 @@ func main() {
 
 			w = check
 
+		// The options.RadioGroup fields
 		case "options.RadioGroup", "*options.RadioGroup":
-			opts, h := options.GetRadioGroup(field.Value)
-			radioGroup := widget.NewRadioGroup(opts, func(s string) {
-				fmt.Printf("changed: %s\n", s)
-				i := slices.Index(opts, s)
-				fmt.Println(i)
-			})
+
+			// Add radio group to form
+			opts, h, selected := options.GetRadioGroup(field.Value)
+			radioGroup := widget.NewRadioGroup(opts, func(s string) {})
 			radioGroup.Horizontal = h
+			radioGroup.Selected = selected
 
 			w = radioGroup
 			d = field.NameDisplay
 
+		// Any other simple fields displayed as string: string, int, float,
+		// etc.
 		default:
 
-			// Add field to form
+			// Add text entry field to form
 			entry := widget.NewEntry()
 			entry.SetText(field.ValueStr)
 
@@ -135,19 +137,22 @@ func main() {
 		fields.SetValues(&data, func(field *conf.Field[fyne.CanvasObject]) string {
 			switch field.Type {
 
+			// Bool fields
 			case "bool":
 				val := field.Entry.(*widget.Check).Checked
 				return fmt.Sprintf("%v", val)
 
+			// The options.RadioGroup fields
 			case "options.RadioGroup", "*options.RadioGroup":
-				// TODO: create and use options function to set value
-				opt := field.Value.(*options.RadioGroup)
 				val := field.Entry.(*widget.RadioGroup).Selected
-				opt.Selected = slices.Index(opt.Options, val)
+				options.SetSelectedValue(field.Value, val)
 
+			// Any other simple fields displayed as string: string, int, float,
+			// etc.
 			default:
 				return field.Entry.(*widget.Entry).Text
 			}
+
 			return ""
 		})
 
