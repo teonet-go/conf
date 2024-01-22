@@ -3,6 +3,10 @@
   "age": 57.3179481234,
   "tst": 1001,
   "map": "12345678",
+  "password": {
+    "entry": "12345",
+    "visible": false
+  },
   "on": false,
   "int_array": [
     1,

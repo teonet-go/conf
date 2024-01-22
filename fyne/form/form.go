@@ -11,7 +11,8 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/widget"
 	"github.com/teonet-go/conf"
-	"github.com/teonet-go/conf/options"
+	"github.com/teonet-go/conf/types/options"
+	"github.com/teonet-go/conf/types/password"
 )
 
 // Form is a widget that creates fine-go form widget.
@@ -55,8 +56,18 @@ func (f *Form) Append(field *conf.Field[fyne.CanvasObject]) {
 		w = radioGroup
 		d = field.NameDisplay
 
-	// Any other simple fields displayed as string: string, int, float,
-	// etc.
+	// The password fields
+	case "password.Password", "*password.Password":
+
+		// Add password entry to form
+		entry := widget.NewPasswordEntry()
+		pas := password.GetValue(field.Value)
+		entry.SetText(pas)
+
+		w = entry
+		d = field.NameDisplay
+
+	// Any other simple fields displayed as string: string, int, float, etc.
 	default:
 
 		// Add text entry field to form
@@ -72,7 +83,6 @@ func (f *Form) Append(field *conf.Field[fyne.CanvasObject]) {
 		h = true
 		w = entry
 		d = field.NameDisplay
-
 	}
 
 	// Append field to form
@@ -100,8 +110,6 @@ func (f *Form) NewSaveButton(o any, save func(), valerr func(err error)) *widget
 
 		// Check if the form is valid
 		if err := f.Validate(); err != nil {
-			// msg := fmt.Sprintf("Cannot save this form:\n %s", err)
-			// dialog.ShowError(fmt.Errorf(msg), w)
 			valerr(err)
 			return
 		}
@@ -119,6 +127,12 @@ func (f *Form) NewSaveButton(o any, save func(), valerr func(err error)) *widget
 			case "options.RadioGroup", "*options.RadioGroup":
 				val := field.Entry.(*widget.RadioGroup).Selected
 				options.SetSelectedValue(field.Value, val)
+
+			// The password fields
+			case "password.Password", "*password.Password":
+				val := field.Entry.(*widget.Entry).Text
+				fmt.Println("val:", val)
+				password.SetValue(field.Value, val)
 
 			// Any other simple fields displayed as string: string, int, float,
 			// etc.

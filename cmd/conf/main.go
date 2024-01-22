@@ -17,7 +17,8 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"github.com/teonet-go/conf/fyne/form"
-	"github.com/teonet-go/conf/options"
+	"github.com/teonet-go/conf/types/options"
+	"github.com/teonet-go/conf/types/password"
 )
 
 // Person structure
@@ -26,6 +27,7 @@ type Person struct {
 	Age      float64             `json:"age"`
 	Tst      int                 `json:"tst"`
 	Map      string              `json:"map"`
+	Password *password.Password  `json:"password"`
 	On       bool                `json:"on"`
 	IntArray []int               `json:"int_array"`
 	FltArray []float64           `json:"float_array"`
@@ -48,7 +50,7 @@ func main() {
 	w := a.NewWindow("JSON Editor")
 
 	// Load the JSON data from a file
-	var person Person
+	var person = Person{Password: &password.Password{}, Option: &options.RadioGroup{}}
 	err := loadJson(&person)
 	if err != nil {
 		log.Fatal(err)
