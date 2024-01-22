@@ -49,8 +49,14 @@ func main() {
 	// Create a new window
 	w := a.NewWindow("JSON Editor")
 
+	// Initialize the data structure with default values. Special form field
+	// types must be initialized.
+	var person = Person{
+		Password: &password.Password{},
+		Option:   &options.RadioGroup{},
+	}
+
 	// Load the JSON data from a file
-	var person = Person{Password: &password.Password{}, Option: &options.RadioGroup{}}
 	err := loadJson(&person)
 	if err != nil {
 		log.Fatal(err)
