@@ -4,10 +4,9 @@
   "tst": 1001,
   "map": "12345678",
   "password": {
-    "entry": "123456",
-    "visible": false
+    "value": "1234567"
   },
-  "on": false,
+  "on": true,
   "int_array": [
     1,
     2,

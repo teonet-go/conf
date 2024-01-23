@@ -55,18 +55,20 @@ type RadioGroupType interface {
 //   - horizontal: bool withtrue if the radio group is horizontal
 //   - selected: string with the selected option
 func GetRadioGroup(opt any) (options []string, horizontal bool, selected string) {
-	if opt, ok := opt.(RadioGroupType); ok {
+	if opt, ok := opt.(RadioGroup); ok {
 		return opt.GetOptions(), opt.GetHorizontal(), opt.GetSelectedStr()
 	}
 	return
 }
 
-// SetSelectedValue sets the selected value for the given option.
+// SetValue sets the selected value for the given option.
 //
 //  opt - the option to set the value for, can be of type RadioGroup or *RadioGroup.
 //  val - the value to be set for the selected option.
-func SetSelectedValue(opt any, val string) {
-	if opt, ok := opt.(RadioGroupType); ok {
+func SetValue(o any, val string) RadioGroup {
+	opt, ok := o.(RadioGroup)
+	if ok {
 		opt.SetSelected(val)
 	}
+	return opt
 }

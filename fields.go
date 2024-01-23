@@ -74,16 +74,26 @@ func GetFields[T any](o any, f func(field *Field[T])) (fields Fields[T]) {
 	return
 }
 
-// SetValues iterates over each field in the Fields collection and sets their values
-// based on the provided function.
+// SetValues iterates over each field in the Fields collection and sets their
+// values based on the provided function.
 //
 // Parameters:
 //   - p: The target object where the field values will be set.
-//   - f: A function that takes a pointer to a Field and returns a string representing the field value.
-func (fields Fields[T]) SetValues(p any, f func(field *Field[T]) string) {
+//   - f: A function that takes a pointer to a Field and returns a string
+//     representing the field value.
+func (fields Fields[T]) SetValues(p any, f func(field *Field[T]) (string, bool)) {
 	for _, field := range fields {
-		txt := f(field)
-		field.SetValue(p, txt)
+		txt, str := f(field)
+		if str {
+			field.SetValue(p, txt)
+		} else {
+			// TODO: move this code to (previouse) SetValue
+			v := reflect.ValueOf(p).Elem()
+			name := field.Name         // Struct field name
+			val := v.FieldByName(name) // Struct field value
+			val.Set(reflect.ValueOf(field.Value))
+			fmt.Println("set value: ", name, val, p)
+		}
 	}
 }
 

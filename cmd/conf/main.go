@@ -23,15 +23,15 @@ import (
 
 // Person structure
 type Person struct {
-	Name     string              `json:"name"`
-	Age      float64             `json:"age"`
-	Tst      int                 `json:"tst"`
-	Map      string              `json:"map"`
-	Password *password.Password  `json:"password"`
-	On       bool                `json:"on"`
-	IntArray []int               `json:"int_array"`
-	FltArray []float64           `json:"float_array"`
-	Option   *options.RadioGroup `json:"option"`
+	Name     string             `json:"name"`
+	Age      float64            `json:"age"`
+	Tst      int                `json:"tst"`
+	Map      string             `json:"map"`
+	Password password.Password  `json:"password"`
+	On       bool               `json:"on"`
+	IntArray []int              `json:"int_array"`
+	FltArray []float64          `json:"float_array"`
+	Option   options.RadioGroup `json:"option"`
 }
 
 // main is the entry point of the program.
@@ -51,10 +51,7 @@ func main() {
 
 	// Initialize the data structure with default values. Special form field
 	// types must be initialized.
-	var person = Person{
-		Password: &password.Password{},
-		Option:   &options.RadioGroup{},
-	}
+	var person Person
 
 	// Load the JSON data from a file
 	err := loadJson(&person)

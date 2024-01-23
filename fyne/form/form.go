@@ -41,11 +41,12 @@ func (f *Form) Append(field *conf.Field[fyne.CanvasObject]) {
 
 		// Add checkbox to form
 		check := widget.NewCheck(field.NameDisplay, func(bool) {})
+		check.Checked = field.Value.(bool)
 
 		w = check
 
 	// The options.RadioGroup fields
-	case "options.RadioGroup", "*options.RadioGroup":
+	case "options.RadioGroup":
 
 		// Add radio group to form
 		opts, h, selected := options.GetRadioGroup(field.Value)
@@ -57,7 +58,7 @@ func (f *Form) Append(field *conf.Field[fyne.CanvasObject]) {
 		d = field.NameDisplay
 
 	// The password fields
-	case "password.Password", "*password.Password":
+	case "password.Password":
 
 		// Add password entry to form
 		entry := widget.NewPasswordEntry()
@@ -115,41 +116,34 @@ func (f *Form) NewSaveButton(o any, save func(), valerr func(err error)) *widget
 		}
 
 		// Update fields values
-		f.fields.SetValues(o, func(field *conf.Field[fyne.CanvasObject]) string {
+		f.fields.SetValues(o, func(field *conf.Field[fyne.CanvasObject]) (string, bool) {
 			switch field.Type {
 
 			// Bool fields
 			case "bool":
 				val := field.Entry.(*widget.Check).Checked
-				return fmt.Sprintf("%v", val)
+				return fmt.Sprintf("%v", val), true
 
 			// The options.RadioGroup fields
-			case "options.RadioGroup", "*options.RadioGroup":
+			case "options.RadioGroup":
 				val := field.Entry.(*widget.RadioGroup).Selected
-				options.SetSelectedValue(field.Value, val)
+				field.Value = options.SetValue(field.Value, val)
 
 			// The password fields
-			case "password.Password", "*password.Password":
+			case "password.Password":
 				val := field.Entry.(*widget.Entry).Text
-				fmt.Println("val:", val)
-				password.SetValue(field.Value, val)
+				field.Value = password.SetValue(field.Value, val)
 
 			// Any other simple fields displayed as string: string, int, float,
 			// etc.
 			default:
-				return field.Entry.(*widget.Entry).Text
+				return field.Entry.(*widget.Entry).Text, true
 			}
 
-			return ""
+			return "", false
 		})
 
-		// Write the encoded JSON back to the file
-		// if err := saveJson(o); err != nil {
-		// 	dialog.ShowError(err, w)
-		// 	return
-		// }
+		// Use save callback to encode json and Write back to the file
 		save()
-
-		// dialog.ShowInformation("Success", "JSON file updated successfully!", w)
 	})
 }

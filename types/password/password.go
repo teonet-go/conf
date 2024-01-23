@@ -7,38 +7,28 @@ package password
 
 // Password type.
 type Password struct {
-	Entry   string `json:"entry"`
-	Visible bool   `json:"visible"`
+	Value string `json:"value"`
 }
 
 // SetValue sets the value of the password.
 func (p *Password) SetValue(val string) {
-	p.Entry = val
+	p.Value = val
 }
 
 // GetValue returns the value of the password.
 func (p Password) GetValue() string {
-	return p.Entry
-}
-
-// PasswordType defines the interface of the password.
-type PasswordType interface {
-	SetValue(val string)
-	GetValue() string
+	return p.Value
 }
 
 // GetValue returns the value of the password.
 func GetValue(pas any) (password string) {
-	if pas, ok := pas.(PasswordType); ok {
+	if pas, ok := pas.(Password); ok {
 		return pas.GetValue()
 	}
 	return
 }
 
 // SetValue sets the value of the password.
-func SetValue(pas any, val string) {
-	if pas, ok := pas.(PasswordType); ok {
-		pas.SetValue(val)
-	}
+func SetValue(pas any, val string) Password {
+	return Password{Value: val}
 }
-

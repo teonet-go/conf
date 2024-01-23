@@ -22,10 +22,10 @@ type Field[T any] struct {
 	Name        string // Field name
 	Type        string // Field type
 	ValueStr    string // Field value as string
-	Value       any    // Field real value
+	Value       any    // Field with real struct value
 
 	// Field entry is a custom field which can be used in GetFields and
-	//SetValues callbacks
+	// SetValues callbacks
 	Entry T
 }
 
