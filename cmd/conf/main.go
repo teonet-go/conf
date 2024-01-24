@@ -31,6 +31,7 @@ type Person struct {
 	IntArray []int            `json:"int_array"`
 	FltArray []float64        `json:"float_array"`
 	Option   types.RadioGroup `json:"option"`
+	Message  types.Multiline  `json:"message"`
 }
 
 // main is the entry point of the program.

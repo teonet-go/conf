@@ -24,18 +24,18 @@ func (o RadioGroup) GetHorizontal() bool { return o.Horizontal }
 // GetSelected returns the selected option index of the radio group.
 func (o RadioGroup) GetSelected() int { return o.Selected }
 
-// GetSelectedStr returns the selected option string of the radio group.
-func (o RadioGroup) GetSelectedStr() (s string) {
+// GetValue returns the selected option string of the radio group.
+func (o RadioGroup) GetValue() (s string) {
 	if o.Selected >= 0 && o.Selected < len(o.Options) {
 		s = o.Options[o.Selected]
 	}
 	return
 }
 
-// GetValue returns the options, horizontal layout flag, and selected option
+// GetParams returns the options, horizontal layout flag, and selected option
 // string.
-func (o RadioGroup) GetValue() (options []string, horizontal bool, selected string) {
-	return o.GetOptions(), o.GetHorizontal(), o.GetSelectedStr()
+func (o RadioGroup) GetParams() (options []string, horizontal bool) {
+	return o.GetOptions(), o.GetHorizontal()
 }
 
 // SetValue sets the selected option index of the radio group by the given

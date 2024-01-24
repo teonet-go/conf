@@ -48,11 +48,11 @@ func (f *Form) Append(field *conf.Field[fyne.CanvasObject]) {
 	case "types.RadioGroup":
 
 		// Add radio group to form
-		// opts, h, selected := options.GetValue(field.Value)
-		opts, h, selected := field.Value.(types.RadioGroup).GetValue()
+		fld := field.Value.(types.RadioGroup)
+		opts, h := fld.GetParams()
 		radioGroup := widget.NewRadioGroup(opts, func(s string) {})
+		radioGroup.Selected = types.GetValue(fld)
 		radioGroup.Horizontal = h
-		radioGroup.Selected = selected
 
 		w = radioGroup
 		d = field.NameDisplay
@@ -62,11 +62,22 @@ func (f *Form) Append(field *conf.Field[fyne.CanvasObject]) {
 
 		// Add password entry to form
 		entry := widget.NewPasswordEntry()
-		// pas := password.GetValue(field.Value)
-		pas := field.Value.(types.Password).GetValue()
-		entry.SetText(pas)
+		fld := field.Value.(types.Password)
+		entry.SetText(types.GetValue(fld))
 
 		w = entry
+		d = field.NameDisplay
+
+	// The multi-line text fields
+	case "types.Multiline":
+
+		// Add multi-line text entry to form
+		fld := field.Value.(types.Multiline)
+		multiline := widget.NewMultiLineEntry()
+		multiline.SetMinRowsVisible(fld.GetNumRows())
+		multiline.SetText(types.GetValue(fld))
+
+		w = multiline
 		d = field.NameDisplay
 
 	// Any other simple fields displayed as string: string, int, float, etc.
@@ -128,12 +139,17 @@ func (f *Form) NewSaveButton(o any, save func(), valerr func(err error)) *widget
 			// The options.RadioGroup fields
 			case "types.RadioGroup":
 				val := field.Entry.(*widget.RadioGroup).Selected
-				field.Value = field.Value.(types.RadioGroup).SetValue(val)
+				types.SetValue[types.RadioGroup](field, val)
 
 			// The password fields
 			case "types.Password":
 				val := field.Entry.(*widget.Entry).Text
-				field.Value = field.Value.(types.Password).SetValue(val)
+				types.SetValue[types.Password](field, val)
+
+			// The multi-line text fields
+			case "types.Multiline":
+				val := field.Entry.(*widget.Entry).Text
+				types.SetValue[types.Multiline](field, val)
 
 			// Any other simple fields displayed as string: string, int, float,
 			// etc.

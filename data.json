@@ -34,6 +34,10 @@
       "Option 3"
     ],
     "horizontal": true,
-    "selected": 1
+    "selected": 2
+  },
+  "message": {
+    "value": "Hello World!\n\nThis is the story of my life.\nIt started in October 1966.",
+    "multiLineRows": 4
   }
 }

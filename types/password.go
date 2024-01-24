@@ -11,13 +11,13 @@ type Password struct {
 	Value string `json:"value"`
 }
 
+// GetValue returns the value of the password.
+func (p Password) GetValue() string {
+	return p.Value
+}
+
 // SetValue sets the value of the password.
 func (p Password) SetValue(val string) Password {
 	p.Value = val
 	return p
-}
-
-// GetValue returns the value of the password.
-func (p Password) GetValue() string {
-	return p.Value
 }
