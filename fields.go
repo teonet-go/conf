@@ -83,17 +83,11 @@ func GetFields[T any](o any, f func(field *Field[T])) (fields Fields[T]) {
 //     representing the field value.
 func (fields Fields[T]) SetValues(p any, f func(field *Field[T]) (string, bool)) {
 	for _, field := range fields {
-		txt, str := f(field)
-		if str {
+		if txt, isStr := f(field); isStr {
 			field.SetValue(p, txt)
-		} else {
-			// TODO: move this code to (previouse) SetValue
-			v := reflect.ValueOf(p).Elem()
-			name := field.Name         // Struct field name
-			val := v.FieldByName(name) // Struct field value
-			val.Set(reflect.ValueOf(field.Value))
-			fmt.Println("set value: ", name, val, p)
+			continue
 		}
+		field.SetValue(p)
 	}
 }
 

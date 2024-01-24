@@ -54,7 +54,7 @@ type Field[T any] struct {
 // value of the specified field.
 //
 // The function does not have any return values.
-func (field *Field[T]) SetValue(p any, value string) (err error) {
+func (field *Field[T]) SetValue(p any, value ...string) (err error) {
 
 	// Check if the p parameter is a pointer to a struct or a map, set values
 	// for struct or map or panic if parameter is not valid (is not a pointer
@@ -63,7 +63,7 @@ func (field *Field[T]) SetValue(p any, value string) (err error) {
 
 	// If the p parameter is a pointer to a struct than set struct values
 	case isStructPtr(p):
-		err = field.setStructValue(p, value)
+		err = field.setStructValue(p, value...)
 
 	// If the p parameter is map or pointer to map than set map values
 	case isMap(p) || isMapPtr(p):
@@ -73,7 +73,7 @@ func (field *Field[T]) SetValue(p any, value string) (err error) {
 		} else {
 			m = p.(map[string]any)
 		}
-		err = field.setMapValue(m, value)
+		err = field.setMapValue(m, value...)
 
 	// If the p parameter is not a pointer to a struct or a map, panic
 	default:
@@ -115,57 +115,76 @@ func (field *Field[T]) ValidateValue(value string) (err error) {
 }
 
 // setStructValue sets the value of a struct field from string value.
-func (field *Field[T]) setStructValue(p any, value string) (err error) {
+func (field *Field[T]) setStructValue(p any, values ...string) (err error) {
 
 	v := reflect.ValueOf(p).Elem() // Struct value
 	name := field.Name             // Struct field name
 	val := v.FieldByName(name)     // Struct field value
 
-	if val.IsValid() && val.CanSet() {
-		switch val.Type().String() {
-		case "string":
-			val.SetString(value)
-		case "int", "int8", "int16", "int32", "int64", "uint", "uint8",
-			"uint16", "uint32", "uint64":
-			i, _ := strconv.Atoi(value)
-			val.SetInt(int64(i))
-		case "float32":
-			f, _ := strconv.ParseFloat(value, 32)
-			val.SetFloat(f)
-		case "float64":
-			f, _ := strconv.ParseFloat(value, 64)
-			val.SetFloat(f)
-		case "bool":
-			val.SetBool(value == "true")
-		case "[]int":
-			s := strings.Split(strings.Trim(value, "[]"), " ")
-			a := make([]int, len(s))
-			for i, str := range s {
-				val, _ := strconv.Atoi(str)
-				a[i] = val
-			}
-			val.Set(reflect.ValueOf(a))
-		case "[]float64":
-			s := strings.Split(strings.Trim(value, "[]"), " ")
-			a := make([]float64, len(s))
-			for i, str := range s {
-				val, _ := strconv.ParseFloat(str, 64)
-				a[i] = val
-			}
-			val.Set(reflect.ValueOf(a))
-		default:
-			err = setError(name, value, val.Type().String())
+	// Set object p field value from real value
+	var value string
+	if len(values) == 0 {
+		val.Set(reflect.ValueOf(field.Value))
+		return
+	}
+	value = values[0]
+
+	// Set object p field value from string value
+	if !(val.IsValid() && val.CanSet()) {
+		err = setError(name, value, val.Type().String())
+		return
+	}
+	switch val.Type().String() {
+	case "string":
+		val.SetString(value)
+	case "int", "int8", "int16", "int32", "int64", "uint", "uint8",
+		"uint16", "uint32", "uint64":
+		i, _ := strconv.Atoi(value)
+		val.SetInt(int64(i))
+	case "float32":
+		f, _ := strconv.ParseFloat(value, 32)
+		val.SetFloat(f)
+	case "float64":
+		f, _ := strconv.ParseFloat(value, 64)
+		val.SetFloat(f)
+	case "bool":
+		val.SetBool(value == "true")
+	case "[]int":
+		s := strings.Split(strings.Trim(value, "[]"), " ")
+		a := make([]int, len(s))
+		for i, str := range s {
+			val, _ := strconv.Atoi(str)
+			a[i] = val
 		}
-	} else {
+		val.Set(reflect.ValueOf(a))
+	case "[]float64":
+		s := strings.Split(strings.Trim(value, "[]"), " ")
+		a := make([]float64, len(s))
+		for i, str := range s {
+			val, _ := strconv.ParseFloat(str, 64)
+			a[i] = val
+		}
+		val.Set(reflect.ValueOf(a))
+	default:
 		err = setError(name, value, val.Type().String())
 	}
+
 	return
 }
 
 // setMapValue sets the map field value from string value.
-func (field *Field[T]) setMapValue(m map[string]any, value string) (err error) {
+func (field *Field[T]) setMapValue(m map[string]any, values ...string) (err error) {
 	key := field.Name
 
+	// Set map m field value from real value
+	var value string
+	if len(values) == 0 {
+		m[key] = reflect.ValueOf(field.Value)
+		return
+	}
+	value = values[0]
+
+	// Set map m field value from string value
 	switch field.Type {
 	case "string":
 		m[key] = value
