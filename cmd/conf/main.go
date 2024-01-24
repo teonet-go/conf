@@ -17,21 +17,20 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"github.com/teonet-go/conf/fyne/form"
-	"github.com/teonet-go/conf/types/options"
-	"github.com/teonet-go/conf/types/password"
+	"github.com/teonet-go/conf/types"
 )
 
 // Person structure
 type Person struct {
-	Name     string             `json:"name"`
-	Age      float64            `json:"age"`
-	Tst      int                `json:"tst"`
-	Map      string             `json:"map"`
-	Password password.Password  `json:"password"`
-	On       bool               `json:"on"`
-	IntArray []int              `json:"int_array"`
-	FltArray []float64          `json:"float_array"`
-	Option   options.RadioGroup `json:"option"`
+	Name     string           `json:"name"`
+	Age      float64          `json:"age"`
+	Tst      int              `json:"tst"`
+	Map      string           `json:"map"`
+	Password types.Password   `json:"password"`
+	On       bool             `json:"on"`
+	IntArray []int            `json:"int_array"`
+	FltArray []float64        `json:"float_array"`
+	Option   types.RadioGroup `json:"option"`
 }
 
 // main is the entry point of the program.

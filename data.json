@@ -4,9 +4,9 @@
   "tst": 1001,
   "map": "12345678",
   "password": {
-    "value": "12345678"
+    "value": "123456"
   },
-  "on": true,
+  "on": false,
   "int_array": [
     1,
     2,
@@ -34,6 +34,6 @@
       "Option 3"
     ],
     "horizontal": true,
-    "selected": 2
+    "selected": 1
   }
 }

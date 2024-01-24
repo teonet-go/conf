@@ -11,8 +11,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/widget"
 	"github.com/teonet-go/conf"
-	"github.com/teonet-go/conf/types/options"
-	"github.com/teonet-go/conf/types/password"
+	"github.com/teonet-go/conf/types"
 )
 
 // Form is a widget that creates fine-go form widget.
@@ -45,11 +44,12 @@ func (f *Form) Append(field *conf.Field[fyne.CanvasObject]) {
 
 		w = check
 
-	// The options.RadioGroup fields
-	case "options.RadioGroup":
+	// The types.RadioGroup fields
+	case "types.RadioGroup":
 
 		// Add radio group to form
-		opts, h, selected := options.GetRadioGroup(field.Value)
+		// opts, h, selected := options.GetValue(field.Value)
+		opts, h, selected := field.Value.(types.RadioGroup).GetValue()
 		radioGroup := widget.NewRadioGroup(opts, func(s string) {})
 		radioGroup.Horizontal = h
 		radioGroup.Selected = selected
@@ -58,11 +58,12 @@ func (f *Form) Append(field *conf.Field[fyne.CanvasObject]) {
 		d = field.NameDisplay
 
 	// The password fields
-	case "password.Password":
+	case "types.Password":
 
 		// Add password entry to form
 		entry := widget.NewPasswordEntry()
-		pas := password.GetValue(field.Value)
+		// pas := password.GetValue(field.Value)
+		pas := field.Value.(types.Password).GetValue()
 		entry.SetText(pas)
 
 		w = entry
@@ -125,14 +126,14 @@ func (f *Form) NewSaveButton(o any, save func(), valerr func(err error)) *widget
 				return fmt.Sprintf("%v", val), true
 
 			// The options.RadioGroup fields
-			case "options.RadioGroup":
+			case "types.RadioGroup":
 				val := field.Entry.(*widget.RadioGroup).Selected
-				field.Value = options.SetValue(field.Value, val)
+				field.Value = field.Value.(types.RadioGroup).SetValue(val)
 
 			// The password fields
-			case "password.Password":
+			case "types.Password":
 				val := field.Entry.(*widget.Entry).Text
-				field.Value = password.SetValue(field.Value, val)
+				field.Value = field.Value.(types.Password).SetValue(val)
 
 			// Any other simple fields displayed as string: string, int, float,
 			// etc.
