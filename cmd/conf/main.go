@@ -63,7 +63,7 @@ func main() {
 	// Load the JSON data from a file
 	err := loadJson(&person)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	// Decode the JSON into map
