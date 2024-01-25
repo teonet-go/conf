@@ -6,7 +6,12 @@
 
 package types
 
-import "slices"
+import (
+	"slices"
+
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/widget"
+)
 
 // RadioGroup type.
 type RadioGroup struct {
@@ -43,4 +48,12 @@ func (o RadioGroup) GetParams() (options []string, horizontal bool) {
 func (o RadioGroup) SetValue(val string) RadioGroup {
 	o.Selected = slices.Index(o.Options, val)
 	return o
+}
+
+func (o RadioGroup) NewWidget() fyne.CanvasObject {
+	opts, h := o.GetParams()
+	w := widget.NewRadioGroup(opts, func(s string) {})
+	w.Selected = GetValue(o)
+	w.Horizontal = h
+	return w
 }

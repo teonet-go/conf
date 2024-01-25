@@ -38,6 +38,6 @@
   },
   "message": {
     "value": "Hello World!\n\nThis is the story of my life.\nIt started in October 1966.",
-    "multiLineRows": 4
+    "multiline_rows": 4
   }
 }

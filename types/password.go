@@ -6,6 +6,11 @@
 
 package types
 
+import (
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/widget"
+)
+
 // Password type.
 type Password struct {
 	Value string `json:"value"`
@@ -20,4 +25,10 @@ func (p Password) GetValue() string {
 func (p Password) SetValue(val string) Password {
 	p.Value = val
 	return p
+}
+
+func (p Password) NewWidget() fyne.CanvasObject {
+	w := widget.NewPasswordEntry()
+	w.SetText(GetValue(p))
+	return w
 }

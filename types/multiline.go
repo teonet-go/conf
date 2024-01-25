@@ -6,10 +6,15 @@
 
 package types
 
+import (
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/widget"
+)
+
 // Password type.
 type Multiline struct {
 	Value         string `json:"value"`
-	MultiLineRows int    `json:"multiLineRows"`
+	MultiLineRows int    `json:"multiline_rows"`
 }
 
 // GetValue returns the value of the password.
@@ -17,7 +22,7 @@ func (m Multiline) GetValue() string {
 	return m.Value
 }
 
-// GetNumRows returns the number of visible rows without scrolling of the 
+// GetNumRows returns the number of visible rows without scrolling of the
 // multiline entry.
 func (m Multiline) GetNumRows() int {
 	return m.MultiLineRows
@@ -27,4 +32,11 @@ func (m Multiline) GetNumRows() int {
 func (m Multiline) SetValue(val string) Multiline {
 	m.Value = val
 	return m
+}
+
+func (m Multiline) NewWidget() fyne.CanvasObject {
+	w := widget.NewMultiLineEntry()
+	w.SetMinRowsVisible(m.GetNumRows())
+	w.SetText(GetValue(m))
+	return w
 }

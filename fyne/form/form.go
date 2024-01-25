@@ -44,44 +44,15 @@ func (f *Form) Append(field *conf.Field[fyne.CanvasObject]) {
 
 		w = check
 
-	// The types.RadioGroup fields
-	case "types.RadioGroup":
-
-		// Add radio group to form
-		fld := field.Value.(types.RadioGroup)
-		opts, h := fld.GetParams()
-		radioGroup := widget.NewRadioGroup(opts, func(s string) {})
-		radioGroup.Selected = types.GetValue(fld)
-		radioGroup.Horizontal = h
-
-		w = radioGroup
-		d = field.NameDisplay
-
-	// The password fields
-	case "types.Password":
-
-		// Add password entry to form
-		entry := widget.NewPasswordEntry()
-		fld := field.Value.(types.Password)
-		entry.SetText(types.GetValue(fld))
-
-		w = entry
-		d = field.NameDisplay
-
-	// The multi-line text fields
-	case "types.Multiline":
-
-		// Add multi-line text entry to form
-		fld := field.Value.(types.Multiline)
-		multiline := widget.NewMultiLineEntry()
-		multiline.SetMinRowsVisible(fld.GetNumRows())
-		multiline.SetText(types.GetValue(fld))
-
-		w = multiline
-		d = field.NameDisplay
-
 	// Any other simple fields displayed as string: string, int, float, etc.
 	default:
+
+		// Check special types and create its widget
+		if widget, ok := types.CheckWidget(field); ok {
+			w = widget
+			d = field.NameDisplay
+			break
+		}
 
 		// Add text entry field to form
 		entry := widget.NewEntry()
