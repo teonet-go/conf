@@ -9,6 +9,7 @@ package types
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/widget"
+	"github.com/teonet-go/conf"
 )
 
 // Password type.
@@ -34,9 +35,21 @@ func (m Multiline) SetValue(val string) Multiline {
 	return m
 }
 
-func (m Multiline) NewWidget() fyne.CanvasObject {
+// SetNumRows sets the number of visible rows without scrolling of the widget.
+func (m *Multiline) SetNumRows(num int) {
+	m.MultiLineRows = num
+}
+
+// GetWidgetValue returns the widget value.
+func (p Multiline) GetWidgetValue(field *conf.Field[fyne.CanvasObject]) string {
+	return field.Entry.(*widget.Entry).Text
+}
+
+// NewWidget creates and returns widget and true if hint for this field is
+// supported.
+func (m Multiline) NewWidget() (fyne.CanvasObject, bool) {
 	w := widget.NewMultiLineEntry()
 	w.SetMinRowsVisible(m.GetNumRows())
 	w.SetText(GetValue(m))
-	return w
+	return w, false
 }

@@ -48,7 +48,8 @@ func (f *Form) Append(field *conf.Field[fyne.CanvasObject]) {
 	default:
 
 		// Check special types and create its widget
-		if widget, ok := types.CheckWidget(field); ok {
+		if widget, hint, ok := types.CheckWidget(field); ok {
+			h = hint
 			w = widget
 			d = field.NameDisplay
 			break
@@ -107,28 +108,16 @@ func (f *Form) NewSaveButton(o any, save func(), valerr func(err error)) *widget
 				val := field.Entry.(*widget.Check).Checked
 				return fmt.Sprintf("%v", val), true
 
-			// The options.RadioGroup fields
-			case "types.RadioGroup":
-				val := field.Entry.(*widget.RadioGroup).Selected
-				types.SetValue[types.RadioGroup](field, val)
-
-			// The password fields
-			case "types.Password":
-				val := field.Entry.(*widget.Entry).Text
-				types.SetValue[types.Password](field, val)
-
-			// The multi-line text fields
-			case "types.Multiline":
-				val := field.Entry.(*widget.Entry).Text
-				types.SetValue[types.Multiline](field, val)
-
-			// Any other simple fields displayed as string: string, int, float,
-			// etc.
 			default:
+				// Check special types and sets it value
+				if types.CheckSave(field) {
+					return "", false
+				}
+
+				// Any other simple fields displayed as string: string, int,
+				// float, etc.
 				return field.Entry.(*widget.Entry).Text, true
 			}
-
-			return "", false
 		})
 
 		// Use save callback to encode json and Write back to the file

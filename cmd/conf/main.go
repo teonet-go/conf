@@ -23,6 +23,7 @@ import (
 // Person structure
 type Person struct {
 	Name     string           `json:"name"`
+	Email    types.Email      `json:"email"`
 	Age      float64          `json:"age"`
 	Tst      int              `json:"tst"`
 	Map      string           `json:"map"`
@@ -52,6 +53,12 @@ func main() {
 	// Initialize the data structure with default values. Special form field
 	// types must be initialized.
 	var person Person
+
+	// Set default Person values which used when data is empty
+	person.Option.SetOptions([]string{"Option 1", "Option 2", "Option 3"})
+	person.Option.SetHorizontal()
+	//
+	person.Message.SetNumRows(4)
 
 	// Load the JSON data from a file
 	err := loadJson(&person)

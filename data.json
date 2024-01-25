@@ -1,11 +1,10 @@
 {
   "name": "John Smith",
+  "email": "johh@example.com",
   "age": 57.3179481234,
   "tst": 1001,
   "map": "12345678",
-  "password": {
-    "value": "123456"
-  },
+  "password": "123456",
   "on": false,
   "int_array": [
     1,
@@ -34,7 +33,7 @@
       "Option 3"
     ],
     "horizontal": true,
-    "selected": 2
+    "selected": 0
   },
   "message": {
     "value": "Hello World!\n\nThis is the story of my life.\nIt started in October 1966.",

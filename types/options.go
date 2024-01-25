@@ -11,6 +11,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/widget"
+	"github.com/teonet-go/conf"
 )
 
 // RadioGroup type.
@@ -50,10 +51,32 @@ func (o RadioGroup) SetValue(val string) RadioGroup {
 	return o
 }
 
-func (o RadioGroup) NewWidget() fyne.CanvasObject {
+// SetOptions sets the options of the radio group.
+func (o *RadioGroup) SetOptions(options []string) {
+	o.Options = options
+}
+
+// SetHorizontal sets the horizontal type of the radio group type.
+func (o *RadioGroup) SetHorizontal() {
+	o.Horizontal = true
+}
+
+// SetVertical sets the vertical type of the radio group type.
+func (o *RadioGroup) SetVertical() {
+	o.Horizontal = false
+}
+
+// GetWidgetValue returns the widget value.
+func (p RadioGroup) GetWidgetValue(field *conf.Field[fyne.CanvasObject]) string {
+	return field.Entry.(*widget.RadioGroup).Selected
+}
+
+// NewWidget creates and returns widget and true if hint for this field is
+// supported.
+func (o RadioGroup) NewWidget() (fyne.CanvasObject, bool) {
 	opts, h := o.GetParams()
 	w := widget.NewRadioGroup(opts, func(s string) {})
 	w.Selected = GetValue(o)
 	w.Horizontal = h
-	return w
+	return w, false
 }

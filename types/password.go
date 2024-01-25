@@ -9,26 +9,31 @@ package types
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/widget"
+	"github.com/teonet-go/conf"
 )
 
 // Password type.
-type Password struct {
-	Value string `json:"value"`
-}
+type Password string
 
 // GetValue returns the value of the password.
 func (p Password) GetValue() string {
-	return p.Value
+	return string(p)
 }
 
 // SetValue sets the value of the password.
 func (p Password) SetValue(val string) Password {
-	p.Value = val
-	return p
+	return Password(val)
 }
 
-func (p Password) NewWidget() fyne.CanvasObject {
+// GetWidgetValue returns the widget value.
+func (p Password) GetWidgetValue(field *conf.Field[fyne.CanvasObject]) string {
+	return field.Entry.(*widget.Entry).Text
+}
+
+// NewWidget creates and returns widget and true if hint for this field is
+// supported.
+func (p Password) NewWidget() (fyne.CanvasObject, bool) {
 	w := widget.NewPasswordEntry()
 	w.SetText(GetValue(p))
-	return w
+	return w, false
 }
