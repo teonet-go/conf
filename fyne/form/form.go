@@ -20,14 +20,59 @@ type Form struct {
 	fields conf.Fields[fyne.CanvasObject]
 }
 
+// New creates and returns new form.
 func New(o any) *Form {
 	f := &Form{Form: widget.NewForm()}
-	f.GetFields(o)
+	f.getFields(o)
 	return f
 }
 
-// Append adds a new field to the form.
-func (f *Form) Append(field *conf.Field[fyne.CanvasObject]) {
+// NewSaveButton creates and returns save button.
+func (f *Form) NewSaveButton(o any, save func(), valerr func(err error)) *widget.Button {
+
+	return widget.NewButton("Save", func() {
+
+		// Check if the form is valid
+		if err := f.Validate(); err != nil {
+			valerr(err)
+			return
+		}
+
+		// Update fields values
+		f.fields.SetValues(o, func(field *conf.Field[fyne.CanvasObject]) (string, bool) {
+			switch field.Type {
+
+			// Bool fields
+			case "bool":
+				val := field.Entry.(*widget.Check).Checked
+				return fmt.Sprintf("%v", val), true
+
+			default:
+				// Check special types and sets it value
+				if types.CheckSave(field) {
+					return "", false
+				}
+
+				// Any other simple fields displayed as string: string, int,
+				// float, etc.
+				return field.Entry.(*widget.Entry).Text, true
+			}
+		})
+
+		// Use save callback to encode json and Write back to the file
+		save()
+	})
+}
+
+// getFields gets fields from object and adds them to the form.
+func (f *Form) getFields(o any) {
+	f.fields = conf.GetFields(o, func(field *conf.Field[fyne.CanvasObject]) {
+		f.append(field)
+	})
+}
+
+// append adds a new field to the form.
+func (f *Form) append(field *conf.Field[fyne.CanvasObject]) {
 
 	var w fyne.CanvasObject // Widget
 	var d string            // Name to displat
@@ -81,46 +126,4 @@ func (f *Form) Append(field *conf.Field[fyne.CanvasObject]) {
 
 	// Set field entry to processing it in SetValues
 	field.Entry = w
-}
-
-func (f *Form) GetFields(o any) {
-	f.fields = conf.GetFields(o, func(field *conf.Field[fyne.CanvasObject]) {
-		f.Append(field)
-	})
-}
-
-func (f *Form) NewSaveButton(o any, save func(), valerr func(err error)) *widget.Button {
-
-	return widget.NewButton("Save", func() {
-
-		// Check if the form is valid
-		if err := f.Validate(); err != nil {
-			valerr(err)
-			return
-		}
-
-		// Update fields values
-		f.fields.SetValues(o, func(field *conf.Field[fyne.CanvasObject]) (string, bool) {
-			switch field.Type {
-
-			// Bool fields
-			case "bool":
-				val := field.Entry.(*widget.Check).Checked
-				return fmt.Sprintf("%v", val), true
-
-			default:
-				// Check special types and sets it value
-				if types.CheckSave(field) {
-					return "", false
-				}
-
-				// Any other simple fields displayed as string: string, int,
-				// float, etc.
-				return field.Entry.(*widget.Entry).Text, true
-			}
-		})
-
-		// Use save callback to encode json and Write back to the file
-		save()
-	})
 }

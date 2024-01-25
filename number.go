@@ -21,7 +21,7 @@ type Number interface {
 	constraints.Integer | constraints.Float
 }
 
-// parseNumber parses a string into a number of type T.
+// ParseNumber parses a string into a number of type T.
 //
 // The function takes a string `s` as input and attempts to convert it into a
 // number of type T. The function supports number types such as int, int8,
@@ -34,7 +34,7 @@ type Number interface {
 // Returns:
 //   - n: the parsed number of type T.
 //   - err: an error indicating any parsing failure.
-func parseNumber[T Number](s string) (n T, err error) {
+func ParseNumber[T Number](s string) (n T, err error) {
 
 	parseFloat := func(s string, bitsize int) (T, error) {
 		var num float64
@@ -62,4 +62,13 @@ func parseNumber[T Number](s string) (n T, err error) {
 	}
 
 	return
+}
+
+// NumberToString converts the input number to a string.
+//
+//	n: the input number of type T
+//
+// Returns the string representation of the input number.
+func NumberToString[T Number](n T) string {
+	return fmt.Sprintf("%v", n)
 }
