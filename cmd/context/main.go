@@ -86,7 +86,14 @@ func main() {
 		ctx, cancel := context.WithTimeout(ctx, r)
 		fmt.Printf("Wait timeout %d %v, %v\n", i, r, ctx)
 
-		go func(i int) { wgStarted.Wait(); printHello(ctx, wg, i); cancel() }(i)
+		// Start goroutine task
+		go func(i int) {
+			wgStarted.Wait()   // Start when all goroutines started
+			printHello(ctx, i) // Task body
+			wg.Done()          // This task is done
+			cancel()           // Cancel context to avoid memory leaks
+		}(i)
+
 		wgStarted.Done()
 	}
 
@@ -102,12 +109,11 @@ func main() {
 	log.Println("Hello from main, all done")
 }
 
-func printHello(ctx context.Context, wg *sync.WaitGroup, i int) {
+func printHello(ctx context.Context, i int) {
 
 	fmt.Println("Start", i)
 	defer fmt.Println("Done", i)
 
-	defer wg.Done()
 	for {
 		select {
 		case <-ctx.Done():
