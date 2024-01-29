@@ -50,52 +50,83 @@ import (
 	"math/rand"
 	"sync"
 	"time"
+
+	"github.com/pbnjay/memory"
 )
+
+// Number of goroutines
+const goroutines = 5
 
 func main() {
 
 	// Set log with microseconds
 	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
 
+	// Start time
+	var start = time.Now()
+
 	// Number of seconds befor cancel context
 	const wait = 5 * time.Second
-
-	// Number of goroutines
-	const goroutines = 3
 
 	// Parent context
 	ctx, cancel := context.WithCancel(context.Background())
 
-	// Create a WaitGroup to wait for all goroutines finished
-	wg := &sync.WaitGroup{}
-
 	// Create a WaitGroup to wait for all goroutines started to start goroutines
-	// processing in one time after all goroutines started
+	// processing in one time after all goroutines started.
 	wgStarted := &sync.WaitGroup{}
 	wgStarted.Add(goroutines)
-	fmt.Println("Start goroutines:")
 
-	// Call a function as a goroutine
+	// Can't start goroutine flag when free memory less than 10 MB
+	first := true
+
+	// Started goroutines counter
+	var started int
+
+	// WaitGroup to wait for all goroutines finished
+	wg := &sync.WaitGroup{}
+
+	// Start goroutines loop
+	fmt.Printf("Try to start %d goroutines:\n", goroutines)
 	for i := 0; i < goroutines; i++ {
-		wg.Add(1)
+
+		// If free memory less than 10 MB than skip all other goroutines creation
+		if !first || memory.FreeMemory() < 10*1024*1024 { // 10 MB
+			if first {
+				fmt.Printf("Free memory %d, %d goroutines started. "+
+					"Can't start any more.\n", memory.FreeMemory(), i)
+				first = false
+			}
+			wgStarted.Done()
+			continue
+		}
 
 		// Get random number of seconds from 1 to 12 for timeout
 		r := time.Duration(1+rand.Intn(11)) * time.Second
 
 		// Create a context with timeout
 		ctx, cancel := context.WithTimeout(ctx, r)
-		fmt.Printf("Wait timeout %d %v, %v\n", i, r, ctx)
+		if goroutines <= 10 {
+			fmt.Printf("Wait timeout %d %v, %v\n", i, r, ctx)
+		}
 
 		// Start goroutine task
+		wg.Add(1)
 		go func(i int) {
-			wgStarted.Wait()   // Start when all goroutines started
-			printHello(ctx, i) // Task body
+			started++          // Number of started goroutines
+			wgStarted.Done()   // Task is started
+			wgStarted.Wait()   // Wait when all goroutines started
+			printHello(ctx, i) // Execute task body
 			wg.Done()          // This task is done
 			cancel()           // Cancel context to avoid memory leaks
 		}(i)
 
-		wgStarted.Done()
 	}
+
+	// Get all task started and show time
+	wgStarted.Wait()
+	fmt.Printf("All %d goroutines started in %v\n", started, time.Since(start))
+	fmt.Printf("Total system memory: %d\n", memory.TotalMemory())
+	fmt.Printf("Free system memory: %d\n", memory.FreeMemory())
 
 	// Create timer which will wait for wait time and than cancel context
 	t := time.AfterFunc(wait, cancel)
@@ -106,35 +137,44 @@ func main() {
 	// Stop the timer
 	t.Stop()
 
-	log.Println("Hello from main, all done")
+	log.Println("Hello from main, all done", time.Since(start))
 }
 
+// printHello is task body, it prints a message and waits ctx.Done() or 
+// for a second.
 func printHello(ctx context.Context, i int) {
 
-	fmt.Println("Start", i)
-	defer fmt.Println("Done", i)
+	if goroutines <= 10 {
+		fmt.Println("Start", i)
+		defer fmt.Println("Done", i)
+	}
 
 	for {
 		select {
 		case <-ctx.Done():
-			// Calculate delay between deadline and current time
-			var delay = func() (delay string) {
-				deadline, _ := ctx.Deadline()
-				if d := time.Since(deadline); d > 0 {
-					delay = fmt.Sprintf(", deadline delay: %v", d)
-				}
-				return
-			}
 
-			// Print message
-			log.Printf("Hello %d receive context done, %v%s\n",
-				i, ctx.Err(), delay(),
-			)
+			// Calculate delay between deadline and current time
+			if goroutines <= 10 {
+				var delay = func() (delay string) {
+					deadline, _ := ctx.Deadline()
+					if d := time.Since(deadline); d > 0 {
+						delay = fmt.Sprintf(", deadline delay: %v", d)
+					}
+					return
+				}
+
+				// Print message
+				log.Printf("Hello %d receive context done, %v%s\n",
+					i, ctx.Err(), delay(),
+				)
+			}
 
 			return
 
 		case <-time.After(1 * time.Second):
-			fmt.Println("Hello from printHello", i)
+			if goroutines <= 10 {
+				fmt.Println("Hello from printHello", i)
+			}
 		}
 	}
 }

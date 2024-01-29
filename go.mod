@@ -4,6 +4,7 @@ go 1.21.6
 
 require (
 	fyne.io/fyne/v2 v2.4.3
+	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58
 	golang.org/x/exp v0.0.0-20240112132812-db7319d0e0e3
 )
 
